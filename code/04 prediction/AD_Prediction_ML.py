@@ -987,10 +987,10 @@ if __name__ == '__main__':
 	help_str = "python AD_Prediction_ML.py" + "\n"
 
 	## input directory
-	input_dir_path = "../../results/k_fold_train_test"
+	input_dir_path = "./results/k_fold_train_test"
 
 	## output directory
-	output_dir_path = "../../results/k_fold_train_test_results"
+	output_dir_path = "./results/k_fold_train_test_results"
 	if not os.path.exists(output_dir_path): os.mkdir(output_dir_path)
 
 	parser = argparse.ArgumentParser()
