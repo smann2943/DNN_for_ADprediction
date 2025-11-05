@@ -26,13 +26,14 @@ def main(args):
 
 	## divide entire into training / test set
 	k = 5
-	kf = KFold(k, True, 1)
+	kf = KFold(k,shuffle=True, random_state= 1)
 
 	## load input gene expression, DNAmethylation
 	gexp_all_df = pd.read_csv(input_gexp, delimiter="\t")
+	print('helloworld')
 	#gexp_all_df.set_index('SampleID', inplace=True)
 	print("gexp_all_df: " + str(gexp_all_df.shape))
-	print(gexp_all_df.ix[:7,:7])
+	
 
 	col_list = gexp_all_df.columns.values.tolist()
 	gene_list = col_list[1:-2]
@@ -48,16 +49,17 @@ def main(args):
 		XY_gexp_test_df = gexp_all_df.iloc[test]
 
 		## make machine learning input
+		print("gexp train {XY_gexp_train_df.shape}")
 		outfilePath = output_dir + "/XY_gexp_train_" + str(kiter) + "_ML_input.tsv"
 		XY_gexp_train_df.to_csv(outfilePath, header=True, index=False, sep="\t")
 		outfilePath = output_dir + "/XY_gexp_test_" + str(kiter) + "_ML_input.tsv"
 		XY_gexp_test_df.to_csv(outfilePath, header=True, index=False, sep="\t")
 
 
-		print(XY_gexp_train_df.ix[:5, :5])
+		
 		print("XY_gexp_train_df: " + str(XY_gexp_train_df.shape))
 
-		print(XY_gexp_test_df.ix[:5, :5])
+
 		print("XY_gexp_test_df: " + str(XY_gexp_test_df.shape))
 
 		## make output data
@@ -91,8 +93,7 @@ def main(args):
 	meth_all_df = pd.read_csv(input_meth, delimiter="\t")
 	#meth_all_df.set_index('SampleID', inplace=True)
 	print("meth_all_df: " + str(meth_all_df.shape))
-	print(meth_all_df.ix[:7, :7])
-
+	
 	col_list = meth_all_df.columns.values.tolist()
 	mpro_list = col_list[1:-2]
 	print(mpro_list[:10])
@@ -112,10 +113,9 @@ def main(args):
 		outfilePath = output_dir + "/XY_meth_test_" + str(kiter) + "_ML_input.tsv"
 		XY_meth_test_df.to_csv(outfilePath, header=True, index=False, sep="\t")
 
-		print(XY_meth_train_df.ix[:5, :5])
+		
 		print("XY_meth_train_df: " + str(XY_meth_train_df.shape))
 
-		print(XY_meth_test_df.ix[:5, :5])
 		print("XY_meth_test_df: " + str(XY_meth_test_df.shape))
 
 		## make output data
@@ -158,13 +158,13 @@ if __name__ == '__main__':
 	## input files
 	## file 1: gene expression (samples x genes) with label (AD, Normal)
 	## file 2: DNA methylation (samples x CpG probes) with label (AD, Normal)
-	input_file_geneExpr = "../../dataset/allforDNN_ge.txt"
-	input_file_DNAMeth = "../../dataset/allforDNN_me.txt"
+	input_file_geneExpr = "./dataset/allforDNN_ge_sample.tsv"
+	input_file_DNAMeth = "./dataset/allforDNN_me_sample.tsv"
 
 	## output directory
 	## performance of the model
-	output_dir = "../../results/k_fold_train_test"
-	if not os.path.exists(output_dir): os.mkdir(output_dir)
+	output_dir = "./results/k_fold_train_test"
+	if not os.path.exists(output_dir): os.makedirs(output_dir, mode=0o777, exist_ok=True)
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--input_1", type=str, default=input_file_geneExpr, help=help_str)

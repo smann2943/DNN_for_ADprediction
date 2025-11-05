@@ -20,8 +20,8 @@ def main():
 	final_col_list = ['logFC', 'P.Value', 'UCSC_RefGene_Group', 'UCSC_RefGene_Name']
 	TSSlist = ['TSS1500', 'TSS200']
 
-	annot_file = "../../dataset/GPL13534-11288.txt" ## GPL13534-11288
-	output_dir = "../../results/k_fold_train_test"
+	annot_file = "./dataset/GPL13534-11288.txt" ## GPL13534-11288
+	output_dir = "./results/k_fold_train_test"
 
 	annot_df = pd.read_csv(annot_file, "\t", header=37)
 	annot_df.set_index('ID', inplace=True)
@@ -30,7 +30,7 @@ def main():
 
 	## Training dataset
 	for i in range(1, 6):
-		input_file = "../../results/k_fold_train_test/DMP/[train " + str(i) + "] AD DMP.tsv"
+		input_file = "./results/k_fold_train_test/DMP/[train " + str(i) + "] AD DMP.tsv"
 		dmp_df = pd.read_csv(input_file, sep="\t")
 		dmp_annot_df = dmp_df.merge(annot_df, how='left', left_index=True, right_index=True)
 		dmp_annot_df = dmp_annot_df[final_col_list]
@@ -44,7 +44,7 @@ def main():
 
 	## Training dataset
 	for i in range(1, 6):
-		input_file = "../../results/k_fold_train_test/DMP/[test " + str(i) + "] AD DMP.tsv"
+		input_file = "./results/k_fold_train_test/DMP/[test " + str(i) + "] AD DMP.tsv"
 		dmp_df = pd.read_csv(input_file, sep="\t")
 		dmp_annot_df = dmp_df.merge(annot_df, how='left', left_index=True, right_index=True)
 		dmp_annot_df = dmp_annot_df[final_col_list]
