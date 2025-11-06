@@ -3,3 +3,4 @@ results/*
 Reference_scripts/*
 venv/*
 .idea/*
+.venv/*

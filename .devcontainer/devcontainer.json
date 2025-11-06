@@ -1,18 +1,25 @@
 {
     "name": "Python 3 with Scikit-learn",
-    "build": {
-        "dockerfile": "./Dockerfile"
+    "image": "mcr.microsoft.com/devcontainers/python:3.9-bullseye",
+    "containerEnv": {
+      "R_LIBS": "~/R-packages"      
     },
     "customizations": {
         "vscode": {
             "extensions": [
                 "ms-python.python",
-                "ms-toolsai.jupyter"
+                "ms-toolsai.jupyter",
+                "REditorSupport.r"
             ]
         }
     },
     "forwardPorts": [],
 
-    "remoteUser": "vscode"
-    
+    "remoteUser": "vscode",
+    "onCreateCommand": "sudo apt-get update && sudo apt-get install -y r-base && mkdir ~/R-packages",
+    "postCreateCommand": [
+        "python -m venv .venv",
+        "source .venv/bin/activate && python -m pip install --upgrade pip && python -m pip install -r requirements.txt",
+        "chmod +777 ./scripts/installRDependencies.sh && ./scripts/installRDependencies.sh"
+    ]
 }
