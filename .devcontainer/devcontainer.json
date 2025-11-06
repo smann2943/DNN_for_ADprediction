@@ -1,9 +1,6 @@
 {
     "name": "Python 3 with Scikit-learn",
-    "image": "mcr.microsoft.com/devcontainers/python:3.9-bullseye",
-    "containerEnv": {
-      "R_LIBS": "~/R-packages"      
-    },
+    "image": "mcr.microsoft.com/devcontainers/universal:latest",    
     "customizations": {
         "vscode": {
             "extensions": [
@@ -13,13 +10,17 @@
             ]
         }
     },
-    "forwardPorts": [],
-
-    "remoteUser": "vscode",
-    "onCreateCommand": "sudo apt-get update && sudo apt-get install -y r-base && mkdir ~/R-packages",
+    "forwardPorts": [],    
+    "features": {
+        "ghcr.io/devcontainers/features/python:1": {},
+        "ghcr.io/rocker-org/devcontainer-features/r-rig:latest": {},
+        "ghcr.io/rocker-org/devcontainer-features/r-packages:1": {
+            "packages": ["data.table", "openxlsx", "parallel", "ggplot2", "pracma", "dgof", "limma"], // Specify the R packages to install
+            "installSystemRequirements": true // Set to true to install system dependencies via pak
+        }
+    },
     "postCreateCommand": [
         "python -m venv .venv",
-        "source .venv/bin/activate && python -m pip install --upgrade pip && python -m pip install -r requirements.txt",
-        "chmod +777 ./scripts/installRDependencies.sh && ./scripts/installRDependencies.sh"
+        "source .venv/bin/activate && python -m pip install --upgrade pip && python -m pip install -r requirements.txt"        
     ]
 }
