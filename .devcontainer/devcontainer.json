@@ -13,7 +13,8 @@
     "forwardPorts": [],
     "onCreateCommand": "apt get update && apt get install -y r-base && python -m pip install --upgrade pip",
     "postCreateCommand": [
-        "python -m pip install -r requirements.txt || true",
+        "python -m venv .venv",
+        "source .venv/bin/activate && python -m pip install -r requirements.txt",
         "chmod +777 ./scripts/installRDependencies.sh && bash ./scripts/installRDependencies.sh"
     ],
     "remoteUser": "vscode"
