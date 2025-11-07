@@ -15,26 +15,18 @@ Python 3.5
 - scikit-learn (0.21.0)
 - Tensorflow (1.4.1)
 
-## Getting started
-- install python `sudo apt update && sudo apt install -y python3-full python3-venv python3-pip`
-- create cirtual environment `python -m venv .venv`
-- install requirements `source .venv/bin/activate && python -m pip install --upgrade pip && python -m pip install -r requirements.txt`
-- download the GPL13534-11288.txt file `python download_GPL13534-11288.py`
-
 ## Input and Output
 ### input files
 - gene expression: allforDNN_ge_sample.txt
 - DNA methylation: allforDNN_me_sample.txt
 
 ## Codes
-1. data preprocessing
-	- Split_Inputdata.py
+1. data preprocessing `python code/01\ data\ preprocessing/Split_Inputdata.py` 	
 2. feature selection
-	- 01 investigate_DEG_all data.R
-	- 02 Annotate_DMP.py
-3. hyperparameter search
-	- BayesianOpt_HpParm_Search.py
+	- `Rscript code/02\ feature\ selection/01\ investigate_DEG_DMP.R`
+	- `python code/02\ feature\ selection/02\ Annotate_DMP.py`
+3. hyperparameter search `python code/03\ hyperparameter\ search/BayesianOpt_HpParm_Search.py`	
 4. prediction
-	- AD_Prediction_ML.py
-	- AD_Prediction_DNN.py
+	- `python code/04\ prediction/AD_Prediction_ML.py`
+	- `python code/04\ prediction/AD_Prediction_DNN.py`
 

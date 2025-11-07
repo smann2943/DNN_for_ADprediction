@@ -15,6 +15,7 @@
         "ghcr.io/rocker-org/devcontainer-features/r-rig:latest": {},
         "ghcr.io/rocker-org/devcontainer-features/r-packages:1": {
             "packages": [
+                "languageserver",
                 "data.table",
                 "openxlsx",
                 "parallel",
@@ -25,5 +26,8 @@
             ], // Specify the R packages to install
             "installSystemRequirements": true // Set to true to install system dependencies via pak
         }
-    }
+    },
+    "onCreateCommand": [
+        "python scripts/download_GPL13534-11288.py"
+    ]
 }
