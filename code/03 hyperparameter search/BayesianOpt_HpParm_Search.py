@@ -985,8 +985,8 @@ for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 	log_filename = './results/k_fold_train_test_results/nn-bayesian_hpSearch_' + str(k) + '.log'
 	if os.path.exists(log_filename):
 		os.remove(log_filename)
-	else:
-		os.makedirs('./results/k_fold_train_test_results')
+	
+		
 
 	log_file = open(log_filename, 'a')
 	accbest = 0.0

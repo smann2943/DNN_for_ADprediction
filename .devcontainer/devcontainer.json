@@ -1,6 +1,7 @@
 {
     "name": "Python 3 with Scikit-learn",
     "image": "mcr.microsoft.com/devcontainers/universal:latest",
+    "runArgs": ["--gpus", "all"],
     "customizations": {
         "vscode": {
             "extensions": [
@@ -12,6 +13,7 @@
     },
     "forwardPorts": [],
     "features": {
+        "ghcr.io/devcontainers/features/nvidia-cuda:2": {},
         "ghcr.io/rocker-org/devcontainer-features/r-rig:latest": {},
         "ghcr.io/rocker-org/devcontainer-features/r-packages:1": {
             "packages": [
