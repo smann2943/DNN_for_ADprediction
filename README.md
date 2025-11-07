@@ -15,6 +15,12 @@ Python 3.5
 - scikit-learn (0.21.0)
 - Tensorflow (1.4.1)
 
+## Getting started
+- install python `sudo apt update && sudo apt install -y python3-full python3-venv python3-pip`
+- create cirtual environment `python -m venv .venv`
+- install requirements `source .venv/bin/activate && python -m pip install --upgrade pip && python -m pip install -r requirements.txt`
+- download the GPL13534-11288.txt file `python download_GPL13534-11288.py`
+
 ## Input and Output
 ### input files
 - gene expression: allforDNN_ge_sample.txt
