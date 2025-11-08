@@ -27,7 +27,7 @@
             "installSystemRequirements": true // Set to true to install system dependencies via pak
         }
     },
-    "postStartCommand": [
+    "updateContentCommand": [
         "python scripts/download_GPL13534-11288.py"
     ]
 }

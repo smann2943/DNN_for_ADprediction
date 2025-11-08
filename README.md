@@ -30,6 +30,9 @@ Click the image to open the published article (ScienceDirect). See the "Backgrou
 - [License](#license)
 - [Acknowledgements](#acknowledgements)
 
+- [Devcontainer (local development)](#devcontainer-local-development)
+- [GPU devcontainer (NVIDIA)](#gpu-devcontainer-nvidia)
+
 ## Background
 
 The project builds models that predict Alzheimer's Disease status by integrating two omics modalities: gene expression and DNA methylation. The implementation includes several dimension-reduction / feature-selection strategies (DEG/DMP, PCA, t-SNE), classical ML models (Random Forest, SVM, Naive Bayes) and a deep neural network model.
@@ -62,6 +65,77 @@ Reference (paraphrased): Park, C., et al., "Prediction of Alzheimer's disease by
 
 Notes:
 - The repository contains `requirements.txt` with pinned versions used here. If you need a GPU-enabled TensorFlow or a specific TF1 behavior, adjust `requirements.txt` accordingly. Some scripts use legacy TF1 APIs; parts of the code have been left as-is to preserve the original behavior.
+
+## Devcontainer (local development)
+
+This repository supports development inside a VS Code devcontainer. Using the devcontainer ensures consistent tooling and versions and makes it easier to reproduce experiments.
+
+Prerequisites:
+- Docker installed and running on the host.
+- VS Code with the "Remote - Containers" (Dev Containers) extension (or the built-in devcontainer support in newer VS Code releases).
+
+Quick steps:
+1. In VS Code: use "Remote-Containers: Open Folder in Container" (Command Palette) and select the repository root.
+2. The devcontainer will build and open the workspace inside the container. Follow the status messages in VS Code for build progress.
+
+Notes:
+- The devcontainer is configured for Ubuntu-based images (this workspace uses Ubuntu 24.04.2 LTS in the dev environment). If you modify devcontainer settings, rebuild the container (Command Palette: "Dev Containers: Rebuild Container").
+- The devcontainer provides a consistent Python environment; you may still want to create and activate a virtual environment inside the container as described in the "Requirements" section.
+
+## GPU devcontainer (NVIDIA)
+
+If you plan to run GPU-accelerated training (TensorFlow / PyTorch), the host must provide NVIDIA GPU support and the NVIDIA Container Toolkit must be installed so containers can access GPUs.
+
+Host prerequisites:
+- NVIDIA GPU with drivers installed on the host (choose a driver version compatible with your CUDA and framework versions).
+- Docker Engine installed on the host.
+
+Install NVIDIA Container Toolkit (summary):
+
+- Follow the official NVIDIA Container Toolkit installation guide for Ubuntu/Debian for exact, up-to-date commands and repository steps:
+
+	https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#with-apt-ubuntu-debian
+
+- The guide shows how to add the NVIDIA apt repository and install the toolkit. A typical sequence you would run on the host (check the official guide for the recommended and current commands) looks like:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg lsb-release
+# Add the NVIDIA package repository (follow the official guide's commands)
+sudo apt-get update
+sudo apt-get install -y nvidia-container-toolkit
+sudo systemctl restart docker
+```
+
+- After installation, verify GPUs are accessible to Docker on the host:
+
+```bash
+docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu24.04 nvidia-smi
+```
+
+Using the GPU-enabled devcontainer:
+- Ensure your devcontainer configuration passes GPU access to the container. This can be achieved by adding runtime arguments or using the `--gpus` option when launching the container. In `devcontainer.json`, you can include Docker `runArgs` such as:
+
+```json
+"runArgs": ["--gpus", "all"]
+```
+
+- Rebuild and reopen the devcontainer after changing `devcontainer.json`.
+
+Verify GPU availability inside the container:
+
+```bash
+# inside the container
+nvidia-smi
+# or in Python
+python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+```
+
+Troubleshooting notes:
+- If `nvidia-smi` is not available inside the container but works on the host, ensure the toolkit is installed on the host and that the container was launched with GPU access (`--gpus all` or equivalent runtime). Restart Docker after installing the toolkit.
+- If drivers mismatch or CUDA toolkit compatibility errors occur, check the host driver version and select a matching CUDA base image for your containerized workloads.
+
+If you want, I can add a sample `devcontainer.json` and Dockerfile tuned for GPU usage (small, safe defaults) — tell me whether you prefer a CPU-only devcontainer or a GPU-enabled devcontainer and I'll add the files.
 
 ## Repository layout
 
