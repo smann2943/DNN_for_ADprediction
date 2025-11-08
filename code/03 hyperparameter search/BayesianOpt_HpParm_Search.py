@@ -982,11 +982,13 @@ for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 	#doMachineLearning_single_Kfold(xy_train, xy_test, "./dataset/BO_input_ML_test_result.txt", 1)
 
 	## file name for final result
-	log_filename = './results/k_fold_train_test_results/nn-bayesian_hpSearch_' + str(k) + '.log'
+	base_path = './results/k_fold_train_test_results'
+	log_filename = os.path.join(base_path,'nn-bayesian_hpSearch_' + str(k) + '.log')
 	if os.path.exists(log_filename):
 		os.remove(log_filename)
-	
-		
+
+	if os.path.exists(base_path) == False:
+		os.makedirs(base_path)		
 
 	log_file = open(log_filename, 'a')
 	accbest = 0.0
