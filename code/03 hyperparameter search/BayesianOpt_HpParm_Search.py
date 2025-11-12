@@ -16,6 +16,7 @@
 ####################################################################################################################################################
 
 
+from time import time
 import pandas as pd
 import tensorflow as tf
 tf.compat.v1.disable_eager_execution()
@@ -910,6 +911,8 @@ def generate_nn(num_hidden, size_layer, learning_rate, dropout_rate):
 
 ########################################################################################################################
 ## start Bayesian optimization
+
+total_start_time = time.time()
 Thres_lfc = 1
 Thres_pval = 0.01
 degSet = getDEG_limma("./dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
@@ -946,6 +949,8 @@ print(Y)
 
 for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 	print("\nk: " + str(k))
+
+	kfold_start_time = time.time()
 
 	x_train, x_test = X[tr_idx], X[te_idx]
 	y_train, y_test = Y[tr_idx], Y[te_idx]
@@ -1017,4 +1022,10 @@ for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 	print('Res: ' + str(NN_BAYESIAN.res))
 
 	k += 1
+	kfold_end_time = time.time()
+	kfold_elapsed_time = kfold_end_time - kfold_start_time
+	print("K-Fold " + str(k-1) + " elapsed time (s): " + str(kfold_elapsed_time))
 
+total_end_time = time.time()
+total_elapsed_time = total_end_time - total_start_time
+print("Total elapsed time (s): " + str(total_elapsed_time))
