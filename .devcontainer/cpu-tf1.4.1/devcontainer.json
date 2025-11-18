@@ -1,6 +1,8 @@
 {
     "name": "Python 3 CPU - TF 1.4.1",
-    "image": "./Dockerfile",
+    "build": {
+        "dockerfile": "./Dockerfile"
+    },
     "customizations": {
         "vscode": {
             "extensions": [
