@@ -141,6 +141,9 @@ input_tsv <- '../XY_gexp_test_5.tsv'
 doDEG(input_tsv, lfc_threshold, p_value_threshold, 5, "test", "DEG")
 
 ################################################################################################
+dir.create("./results/k_fold_train_test/DMP", recursive = TRUE)
+setwd("./results/k_fold_train_test/DMP")
+
 p_value_threshold=0.01
 lfc_threshold=0.58
 

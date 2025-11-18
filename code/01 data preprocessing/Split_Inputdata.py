@@ -26,7 +26,7 @@ def main(args):
 
 	## divide entire into training / test set
 	k = 5
-	kf = KFold(k,shuffle=True, random_state= 1)
+	kf = KFold(k, True, 1)
 
 	## load input gene expression, DNAmethylation
 	gexp_all_df = pd.read_csv(input_gexp, delimiter="\t")
@@ -158,6 +158,7 @@ if __name__ == '__main__':
 	## input files
 	## file 1: gene expression (samples x genes) with label (AD, Normal)
 	## file 2: DNA methylation (samples x CpG probes) with label (AD, Normal)
+	## NOTE:  In the original code the file names did not have the _sample suffix, but the files in the dataset folder do have this suffix.
 	input_file_geneExpr = "./dataset/allforDNN_ge_sample.tsv"
 	input_file_DNAMeth = "./dataset/allforDNN_me_sample.tsv"
 
