@@ -13,20 +13,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     zip \
     zlib1g-dev \
-    software-properties-common \
-    python3-dev \
-    python3-pip \
+    software-properties-common \    
     ca-certificates && \
+    libncurses5-dev && \
+    libgdbm-dev && \
+    libnss3-dev && \
+    libssl-dev && \
+    libreadline-dev && \
+    libffi-dev && \
+    libbz2-dev && \
+    libsqlite3-dev && \
+    liblzma-dev && \
+    tk-dev && \
+    uuid-dev && \
+    libgdbm-compat-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Python 3.5 from deadsnakes (kept for compatibility with older TF)
-RUN add-apt-repository ppa:deadsnakes/ppa -y && \
-    apt-get update && apt list | grep python3 && \
-    apt-get install -y --no-install-recommends python3.5 python3-pip && \
-    rm -rf /var/lib/apt/lists/* && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.5 1 && \
-    echo 'current python version' && \
-    python --version && pip --version
+# Install Python 3.5 from source (kept for compatibility with older TF)
+RUN  /usr/src && \
+    wget https://www.python.org/ftp/python/3.5.10/Python-3.5.10.tgz && \
+    tar xzf Python-3.5.10.tgz && \
+    cd Python-3.5.10 && \   
+    ./configure --enable-optimizations --enable-shared --prefix=/opt/python3.5 LDFLAGS="-Wl,-rpath=/opt/python3.5/lib" && \
+    make -j$(nproc) && \
+    make altinstall    # ← important: altinstall, not install
 
 ENV PATH="/usr/local/bin:$PATH"
 
@@ -48,7 +58,7 @@ RUN pip3 install --no-cache-dir numpy six wheel && \
     echo "\n\n\n\n\n\n\n\n" | ./configure
 
 # Build the pip package
-RUN bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package && \
+RUN bazel build --python_path=/opt/python3.5/bin/python3.5 --config=opt //tensorflow/tools/pip_package:build_pip_package && \
     ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
 
 # Final stage: small runtime image with the wheel installed
@@ -56,15 +66,10 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install runtime dependencies and python/pip
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.5 python3-pip ca-certificates libstdc++6 && \
-    rm -rf /var/lib/apt/lists/* && \    
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.5 1 && \
-    echo 'current python version' && \
-    python --version && pip --version
-
 # Copy the built wheel from the builder stage into the final image
 COPY --from=builder /tmp/tensorflow_pkg/tensorflow-1.4.1-*.whl /tmp/
+COPY --from=builder /opt/python3.5 /opt/python3.5
 
 # Install the wheel in the final layer (this produces a separate layer containing the installed wheel)
-RUN pip3 install /tmp/tensorflow-1.4.1-*.whl && rm -f /tmp/tensorflow-1.4.1-*.whl
+RUN /opt/python3.5/bin/python3.5 -m pip install /tmp/tensorflow-1.4.1-*.whl && rm -f /tmp/tensorflow-1.4.1-*.whl && \
+    update-alternatives --install /usr/bin/python python /opt/python3.5/bin/python3.5 1
