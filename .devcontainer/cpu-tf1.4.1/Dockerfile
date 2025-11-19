@@ -2,7 +2,7 @@
 ARG TF_VERSION=v1.4.1
 
 # Builder stage: compile TensorFlow and produce a wheel
-FROM ubuntu:16.04 AS builder
+FROM ubuntu:18.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system build dependencies
@@ -36,3 +36,36 @@ RUN wget https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4
     ./bazel-0.5.4-installer-linux-x86_64.sh && \
     rm bazel-0.5.4-installer-linux-x86_64.sh && \
     mkdir /tensorflow
+
+# Clone TensorFlow and check out the requested tag
+WORKDIR /tensorflow
+RUN git --version && git clone --branch ${TF_VERSION} --depth 1 https://github.com/tensorflow/tensorflow.git .
+
+# Install Python build deps and run configure
+RUN pip3 install --no-cache-dir numpy six wheel && \
+    echo "\n\n\n\n\n\n\n\n" | ./configure
+
+# Build the pip package
+RUN bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package && \
+    ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+
+# Final stage: small runtime image with the wheel installed
+FROM ubuntu:20.04
+ARG TF_VERSION=v1.4.1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install runtime dependencies and python/pip
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.5 python3-pip ca-certificates libstdc++6 && \
+    rm -rf /var/lib/apt/lists/* && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.5 1
+
+# Copy the built wheel from the builder stage into the final image
+COPY --from=builder /tmp/tensorflow_pkg/tensorflow-${TF_VERSION}-*.whl /tmp/
+
+# Install the wheel in the final layer (this produces a separate layer containing the installed wheel)
+RUN pip3 install /tmp/tensorflow-${TF_VERSION}-*.whl && rm -f /tmp/tensorflow-${TF_VERSION}-*.whl
+
+# Image ready for use. Optionally add project requirements as needed.
+# COPY requirements.txt /app/
+# RUN pip3 install -r /app/requirements.txt
