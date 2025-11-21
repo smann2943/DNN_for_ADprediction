@@ -40,7 +40,7 @@ RUN cd Python-3.5.10 && \
     ./configure --enable-optimizations --enable-shared --prefix=/opt/python3.5 LDFLAGS="-Wl,-rpath=/opt/python3.5/lib" && \
     make -j$(nproc) && \
     make altinstall
-    
+
 ENV PATH="/usr/local/bin:$PATH"
 
 # Set Python3.5 as default python (many TF build
@@ -80,4 +80,5 @@ COPY --from=builder /opt/python3.5 /opt/python3.5
 
 # Install the wheel in the final layer (this produces a separate layer containing the installed wheel)
 RUN /opt/python3.5/bin/python3.5 -m pip install /tmp/tensorflow-1.4.1-*.whl && rm -f /tmp/tensorflow-1.4.1-*.whl && \
-    update-alternatives --install /usr/bin/python python /opt/python3.5/bin/python3.5 1
+    update-alternatives --install /usr/bin/python python /opt/python3.5/bin/python3.5 1 && \
+    update-alternatives --install /usr/bin/pip pip /opt/python3.5/bin/pip3.5 1 || true
