@@ -111,6 +111,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY --from=builder /tmp/tensorflow_pkg/tensorflow-1.4.1-*.whl /tmp/
 COPY --from=builder /opt/python3.5 /opt/python3.5
 
+# install ssl and gcc to support many pip packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libssl1.1 \
+    gcc \
+    r-base \
+    rm -rf /var/lib/apt/lists/*
+
 # Install the wheel in the final layer (this produces a separate layer containing the installed wheel)
 RUN /opt/python3.5/bin/python3.5 -m pip install /tmp/tensorflow-1.4.1-*.whl && rm -f /tmp/tensorflow-1.4.1-*.whl && \
     update-alternatives --install /usr/bin/python python /opt/python3.5/bin/python3.5 1 && \
