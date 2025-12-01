@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
     git \
+    autoconf \
+    automake \
+    libtool \
     build-essential \
     pkg-config \
     zip \
@@ -61,13 +64,11 @@ RUN wget https://github.com/bazelbuild/bazel/releases/download/0.5.4/bazel-0.5.4
 
 # Clone TensorFlow and check out the requested tag
 WORKDIR /tensorflow
-RUN git --version && \
-    git clone --branch v1.4.1 --depth 1 https://github.com/tensorflow/tensorflow.git .
+RUN git clone --branch v1.4.1 --depth 1 https://github.com/tensorflow/tensorflow.git .
 
 # Install Python packages that TF 1.4.1 absolutely needs at configure time
 RUN /opt/python3.5/bin/pip3.5 install --no-cache-dir \
     numpy==1.13.3 \
-    six \
     wheel \
     mock \
     future && \
@@ -113,12 +114,12 @@ COPY --from=builder /opt/python3.5 /opt/python3.5
 
 # install ssl and gcc to support many pip packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libssl1.1 \
+    git \
     gcc \
-    r-base \
+    r-base && \
     rm -rf /var/lib/apt/lists/*
 
 # Install the wheel in the final layer (this produces a separate layer containing the installed wheel)
-RUN /opt/python3.5/bin/python3.5 -m pip install /tmp/tensorflow-1.4.1-*.whl && rm -f /tmp/tensorflow-1.4.1-*.whl && \
+RUN /opt/python3.5/bin/python3.5 -m pip install --no-deps /tmp/tensorflow-1.4.1-*.whl && rm -f /tmp/tensorflow-1.4.1-*.whl && \
     update-alternatives --install /usr/bin/python python /opt/python3.5/bin/python3.5 1 && \
     update-alternatives --install /usr/bin/pip pip /opt/python3.5/bin/pip3.5 1 || true
