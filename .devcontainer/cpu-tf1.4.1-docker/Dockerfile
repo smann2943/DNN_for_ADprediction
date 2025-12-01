@@ -110,14 +110,44 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install runtime dependencies and python/pip
 # Copy the built wheel from the builder stage into the final image
 COPY --from=builder /tmp/tensorflow_pkg/tensorflow-1.4.1-*.whl /tmp/
-COPY --from=builder /opt/python3.5 /opt/python3.5
+COPY --from=builder /tmp/python3.5 /temp/python3.5
 
 # install ssl and gcc to support many pip packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    curl \
+    unzip \
     git \
     gcc \
+    autoconf \
+    automake \
+    libtool \
+    build-essential \
+    pkg-config \
+    zip \
+    zlib1g-dev \
+    libssl-dev \
+    libbz2-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libffi-dev \
+    libncurses5-dev \
+    libncursesw5-dev \
+    liblzma-dev \
+    tk-dev \
+    software-properties-common \
+    ca-certificates \
     r-base && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* 
+
+WORKDIR /tmp    
+# Install Python 3.5 from source (kept for compatibility with older TF)
+RUN cd Python-3.5.10 && \
+    ./configure --enable-optimizations --enable-shared --prefix=/opt/python3.5 LDFLAGS="-Wl,-rpath=/opt/python3.5/lib" && \
+    make -j$(nproc) && \
+    make altinstall
+
+ENV PATH="/usr/local/bin:$PATH"
 
 # Install the wheel in the final layer (this produces a separate layer containing the installed wheel)
 RUN /opt/python3.5/bin/python3.5 -m pip install --no-deps /tmp/tensorflow-1.4.1-*.whl && rm -f /tmp/tensorflow-1.4.1-*.whl && \
