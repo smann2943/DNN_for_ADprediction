@@ -107,10 +107,11 @@ RUN export PYTHON_BIN_PATH=/opt/python3.5/bin/python3.5 && \
 FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN mkdir -p /tmp/Python-3.5.10
 # Install runtime dependencies and python/pip
 # Copy the built wheel from the builder stage into the final image
 COPY --from=builder /tmp/tensorflow_pkg/tensorflow-1.4.1-*.whl /tmp/
-COPY --from=builder /tmp/python3.5 /temp/python3.5
+COPY --from=builder /tmp/Python-3.5.10 /tmp/Python-3.5.10
 
 # install ssl and gcc to support many pip packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -140,7 +141,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     r-base && \
     rm -rf /var/lib/apt/lists/* 
 
-WORKDIR /tmp    
+WORKDIR /tmp
 # Install Python 3.5 from source (kept for compatibility with older TF)
 RUN cd Python-3.5.10 && \
     ./configure --enable-optimizations --enable-shared --prefix=/opt/python3.5 LDFLAGS="-Wl,-rpath=/opt/python3.5/lib" && \
@@ -149,7 +150,9 @@ RUN cd Python-3.5.10 && \
 
 ENV PATH="/usr/local/bin:$PATH"
 
+WORKDIR /
 # Install the wheel in the final layer (this produces a separate layer containing the installed wheel)
 RUN /opt/python3.5/bin/python3.5 -m pip install --no-deps /tmp/tensorflow-1.4.1-*.whl && rm -f /tmp/tensorflow-1.4.1-*.whl && \
     update-alternatives --install /usr/bin/python python /opt/python3.5/bin/python3.5 1 && \
-    update-alternatives --install /usr/bin/pip pip /opt/python3.5/bin/pip3.5 1 || true
+    update-alternatives --install /usr/bin/pip pip /opt/python3.5/bin/pip3.5 1 || true && \
+    rm -rf /tmp/Python-3.5.10
