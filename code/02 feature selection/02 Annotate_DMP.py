@@ -39,7 +39,10 @@ def main():
         input_file = "./results/k_fold_train_test/DEG/[train " + str(
             i) + "] AD DMP.tsv"
         if not os.path.exists(input_file):
-            print(f"Warning: input file not found, skipping: {input_file}")
+            # Python f-strings require Python 3.6+
+            # print(f"Warning: input file not found, skipping: {input_file}")
+
+            print("Warning: input file not found, skipping: {}".format(input_file))
             continue
         dmp_df = pd.read_csv(input_file, sep="\t")
         dmp_annot_df = dmp_df.merge(
@@ -61,7 +64,8 @@ def main():
         input_file = "./results/k_fold_train_test/DEG/[test " + str(
             i) + "] AD DMP.tsv"
         if not os.path.exists(input_file):
-            print(f"Warning: input file not found, skipping: {input_file}")
+            #print(f"Warning: input file not found, skipping: {input_file}")
+            print("Warning: input file not found, skipping: {}".format(input_file))
             continue
         dmp_df = pd.read_csv(input_file, sep="\t")
         dmp_annot_df = dmp_df.merge(
