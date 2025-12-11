@@ -12,5 +12,10 @@
             ]
         }
     },
-    "forwardPorts": []
+    "forwardPorts": [],
+    "postCreateCommand": {
+        "create-and-activate-venv": "python -m venv .venv && source .venv/bin/activate",
+        "r-install-requirements": "RScript ./scripts/install.R",
+        "install-python-tensorflow": "python -m pip install --upgrade pip && python -m pip install /tmp/tensorflow-1.4.1-c35-linux_x86_64.whl"
+    }
 }

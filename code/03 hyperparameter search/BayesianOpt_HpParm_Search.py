@@ -15,8 +15,7 @@
 #       best combination of hyper-parameters
 ####################################################################################################################################################
 
-
-from time import time
+import time
 import pandas as pd
 import tensorflow as tf
 from bayes_opt import BayesianOptimization
@@ -233,7 +232,14 @@ def applyDimReduction_DEG_intersectGene(infilename, geneSet, filter_fn, Thres_lf
 	xy_all_df = pd.read_csv(infilename, sep='\t')
 
 	# Get the intersection of the columns in xy_all_df and selected_genelist
-	xy_sel_df = xy_all_df[selected_genelist]
+	# Commenting out this code because there are values in selected_genelist that are not in the columns in the dataframe which throws an error.
+	# We need to get the intersection of columns and this code is not doing that
+	# xy_sel_df = xy_all_df[selected_genelist]
+
+	# This code is a replacement of the commented out code above to get the columns in the dataframe based on the filtered set of genes
+	existing_genelist = [col for col in selected_genelist if col in xy_all_df.columns]
+	xy_sel_df = xy_all_df[existing_genelist]
+
 	xy = xy_sel_df.as_matrix()
 	print("xy shape: " + xy.shape.__str__())
 
@@ -288,8 +294,17 @@ def applyDimReduction_DMP_intersectGene(infilename, geneSet, filter_fn):
 	#xy_all_df = pd.read_csv(infilename, sep='\t')
 	#xy_sel_df = xy_all_df[selected_cpglist]
 
-	xy_all_df = pd.read_csv(infilename, sep='\t')
-	xy_sel_df = pd.read_csv(infilename, sep='\t', usecols=selected_cpglist)
+	# Get the intersection of the columns in xy_all_df and selected_genelist
+	# Commenting out this code because there are values in selected_genelist that are not in the columns in the dataframe which throws an error.
+	# We need to get the intersection of columns and this code is not doing that	
+	#xy_sel_df = pd.read_csv(infilename, sep='\t', usecols=selected_cpglist)
+
+	xy_columns_df = pd.read_csv(infilename, sep='\t', nrows=0)
+
+	# This code is a replacement of the commented out code above to get the columns in the dataframe based on the filtered set of genes
+	filtered_columns = [col for col in selected_cpglist if col in xy_columns_df.columns]
+	xy_sel_df = pd.read_csv(infilename, sep='\t', usecols=filtered_columns)
+	
 	xy = xy_sel_df.as_matrix() ## sampleID, expr + label 2 columns
 	print("xy shape: " + xy.shape.__str__())
 	print(xy)

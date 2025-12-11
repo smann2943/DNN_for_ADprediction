@@ -26,9 +26,9 @@ import pandas as pd
 import sys
 import os
 import operator
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-mpl.use('Agg')
+#import matplotlib as mpl
+#import matplotlib.pyplot as plt
+#mpl.use('Agg')
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score, train_test_split
@@ -427,6 +427,10 @@ def applyDimReduction_TSNE(infilename, num_comp, scatterPlot_fn, mode):
 	print("xy_values: " + str(xy_values.shape))
 	print("xy_labels: " + str(xy_labels.shape))
 
+	if np.any(np.isnan(xy_values)) or np.any(np.isinf(xy_values)):
+		print("!!! ERROR: Data contains NaN or Inf values before t-SNE for file: " + infilename)
+		sys.exit()
+	
 	X_embedded = TSNE(n_components=num_comp, method='exact').fit_transform(xy_values)
 	XY_embedded = np.append(X_embedded, xy_labels, axis=1)
 	print("XY_embedded: " + XY_embedded.shape.__str__())
@@ -926,7 +930,7 @@ def main(args):
 	print("Deep Neural Network approach")
 	input_dir = args.input  ## ./results/k_fold_train_test
 	output_dir = args.output  ## ./results/k_fold_train_test_results
-	if not os.path.exists(output_dir): os.mkdir(output_dir)
+	if not os.path.exists(output_dir): os.makedirs(output_dir)
 
 	for j in range(0, 1):
 		if j == 0:
@@ -943,25 +947,25 @@ def main(args):
 			## make directories
 			## table 1
 			dirPath_table1_ge = output_dir + "/k_" + str(k) + "/table_1/genExpr"
-			if not os.path.exists(dirPath_table1_ge): os.mkdir(dirPath_table1_ge)
+			if not os.path.exists(dirPath_table1_ge): os.makedirs(dirPath_table1_ge)
 			dirPath_table1_me = output_dir + "/k_" + str(k) + "/table_1/meth"
-			if not os.path.exists(dirPath_table1_me): os.mkdir(dirPath_table1_me)
+			if not os.path.exists(dirPath_table1_me): os.makedirs(dirPath_table1_me)
 
 			## table 2
 			dirPath_table2_geme = output_dir + "/k_" + str(k) + "/table_2/genExpr_meth"
-			if not os.path.exists(dirPath_table2_geme): os.mkdir(dirPath_table2_geme)
+			if not os.path.exists(dirPath_table2_geme): os.makedirs(dirPath_table2_geme)
 
 			## table 3
 			dirPath_table3_deg = output_dir + "/k_" + str(k) + "/table_3/DEG"
-			if not os.path.exists(dirPath_table3_deg): os.mkdir(dirPath_table3_deg)
+			if not os.path.exists(dirPath_table3_deg): os.makedirs(dirPath_table3_deg)
 			dirPath_table3_dmg = output_dir + "/k_" + str(k) + "/table_3/DMG"
-			if not os.path.exists(dirPath_table3_dmg): os.mkdir(dirPath_table3_dmg)
+			if not os.path.exists(dirPath_table3_dmg): os.makedirs(dirPath_table3_dmg)
 			dirPath_table3_deg_dmg = output_dir + "/k_" + str(k) + "/table_3/DEG_DMG"
-			if not os.path.exists(dirPath_table3_deg_dmg): os.mkdir(dirPath_table3_deg_dmg)
+			if not os.path.exists(dirPath_table3_deg_dmg): os.makedirs(dirPath_table3_deg_dmg)
 
 			##  table 4
 			dirPath_table4_deg_dmg = output_dir + "/k_" + str(k) + "/table_4/DEG_DMG"
-			if not os.path.exists(dirPath_table4_deg_dmg): os.mkdir(dirPath_table4_deg_dmg)
+			if not os.path.exists(dirPath_table4_deg_dmg): os.makedirs(dirPath_table4_deg_dmg)
 
 
 			################################################################################################################
@@ -970,7 +974,7 @@ def main(args):
 			thresh_pval_ge = 0.01
 			thresh_lfc_me = 0.58
 			thresh_pval_me = 0.01
-			mapTableFile = "../../dataset/GPL13534-11288.txt"
+			mapTableFile = "./dataset/GPL13534-11288.txt"
 
 			## training
 			## load DEG, DMG for
@@ -978,9 +982,6 @@ def main(args):
 			dmgSet, geneCpgSet_map = load_DEG_DMG(input_dir + "/DMP/[train " + str(k) + "] AD DMP.tsv", thresh_lfc_me, thresh_pval_me, "DMP", mapTableFile)
 
 			its_geneSet = degSet & dmgSet
-			print("its_geneSet: " + str(len(its_geneSet)))
-			print("train_xy_gxpr: " + str(train_xy_gxpr.shape))
-			print("train_xy_meth: " + str(train_xy_meth.shape))
 
 			## our feature selection approach
 			train_xy_gxpr = applyFeatSel_DEG_intersectGene(input_dir + "/XY_gexp_train_" + str(k) + "_ML_input.tsv", its_geneSet)
@@ -991,6 +992,11 @@ def main(args):
 			test_xy_gxpr_meth = buildIntegratedDataset_DNN(test_xy_gxpr, test_xy_meth, mode)
 			dnn_result_output = output_dir + "/[" + str(k) + "]["+ mode + "] DNN_deg_dmg.tsv"
 			doDNN_8(train_xy_gxpr_meth, test_xy_gxpr_meth, dnn_result_output, 1500, "no")
+
+			print("its_geneSet: " + str(len(its_geneSet)))
+			print("train_xy_gxpr: " + str(train_xy_gxpr.shape))
+			print("train_xy_meth: " + str(train_xy_meth.shape))
+
 
 			## PCA, t-SNE + DNN
 			print("\n\nExperiment 1~2. PCA, t-SNE + ML")
@@ -1037,7 +1043,7 @@ if __name__ == '__main__':
 
 	## output directory
 	output_dir_path = "./results/k_fold_train_test_results"
-	if not os.path.exists(output_dir_path): os.mkdir(output_dir_path)
+	if not os.path.exists(output_dir_path): os.makedirs(output_dir_path)
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--input", type=str, default=input_dir_path, help=help_str)
