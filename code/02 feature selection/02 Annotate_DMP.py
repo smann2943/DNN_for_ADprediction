@@ -36,7 +36,7 @@ def main():
 
     # Training dataset
     for i in range(1, 6):
-        input_file = "./results/k_fold_train_test/DEG/[train " + str(
+        input_file = "./results/k_fold_train_test/DMP/[train " + str(
             i) + "] AD DMP.tsv"
         if not os.path.exists(input_file):
             # Python f-strings require Python 3.6+
@@ -61,7 +61,7 @@ def main():
 
     # Training dataset
     for i in range(1, 6):
-        input_file = "./results/k_fold_train_test/DEG/[test " + str(
+        input_file = "./results/k_fold_train_test/DMP/[test " + str(
             i) + "] AD DMP.tsv"
         if not os.path.exists(input_file):
             #print(f"Warning: input file not found, skipping: {input_file}")
