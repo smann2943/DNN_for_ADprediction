@@ -1,3 +1,5 @@
+# define the CRAN mirror 
+options(repos = c(CRAN = "https://cloud.r-project.org/"))
 # Define a vector of package names to be installed
 packages_to_install <- c("openxlsx", "data.table", "remotes", "pracma", "dgof", "BiocManager")
 

@@ -63,6 +63,15 @@ def buildIntegratedDataset_DNN(xy_gxpr, xy_meth, mode):
 	n_row_g, n_col_g = xy_gxpr.shape
 	n_row_m, n_col_m = xy_meth.shape
 
+        # Basic validation: ensure inputs contain feature columns (not only SampleID+labels)
+	if n_col_g <= 2:
+	    print("[ERROR] Gene expression input has no feature columns (shape={})".format(xy_gxpr.shape))
+	    raise ValueError("Gene expression input contains no features. Verify feature selection step and input file format.")
+
+	if n_col_m <= 2:
+	    print("[ERROR] Methylation input has no feature columns (shape={})".format(xy_meth.shape))
+	    raise ValueError("Methylation input contains no features. Verify feature selection step and input file format.")
+
 	# build random index pair set
 	idxSet_No = set()
 	idxSet_AD = set()
@@ -275,6 +284,15 @@ def applyFeatSel_DEG_intersectGene(infilename, geneSet):
 	xy_values = xy[:, 1:-2]
 	xy_labels = xy[:, -2:]
 
+	# Diagnostic checks: ensure there are feature columns
+	n_features = 0 if xy_values.size == 0 else xy_values.shape[1]
+	if n_features == 0:
+	    print("[ERROR] No features selected by DEG-based feature selection for file: " + infilename)
+	    print("[ERROR] Requested columns (len={}): {}".format(len(selected_genelist), selected_genelist[:20]))
+	    print("[ERROR] Dataframe columns available: {}".format(list(xy_all_df.columns)))
+	    raise ValueError("No feature columns found after DEG selection. Check thresholds or input file.")
+
+
 	# Label transformation: one hot | [1 0], [0 1] = No, AD --> one column | 0 or 1 = No, AD
 	xy_labels_1_column = []
 
@@ -316,6 +334,15 @@ def applyFeatSel_DMP_intersectGene(infilename, geneSet, geneCpgSet_map):
 	xy_tp = np.transpose(xy)
 	xy_values = xy[:, 1:-2]
 	xy_labels = xy[:, -2:]
+
+        # Diagnostic checks: ensure there are feature columns
+	n_features = 0 if xy_values.size == 0 else xy_values.shape[1]
+	if n_features == 0:
+		print("[ERROR] No features selected by DMP-based feature selection for file: " + infilename)
+		print("[ERROR] Requested columns (len={}): {}".format(len(selected_cpglist), selected_cpglist[:20]))
+		print("[ERROR] Dataframe columns available: {}".format(list(xy_all_df.columns)))
+		raise ValueError("No feature columns found after DMP selection. Check gene->CpG mapping and input file.")
+
 
 	# Label transformation: one hot | [1 0], [0 1] = No, AD --> one column | 0 or 1 = No, AD
 	xy_labels_1_column = []
@@ -870,7 +897,7 @@ def getProbeGeneMap(mapTableFile):
 	#print("gpl_df: " + str(gpl_df.shape))
 	## make dict
 	cpg_geneSymbol_dict = dict(zip(gpl_df['ID'], gpl_df['gene_symbol']))
-	#print("cpg_geneSymbol_dict: " + str(len(cpg_geneSymbol_dict.keys())))
+	print("cpg_geneSymbol_dict: " + str(len(cpg_geneSymbol_dict.keys())))
 
 	return cpg_geneSymbol_dict
 
@@ -982,6 +1009,9 @@ def main(args):
 			dmgSet, geneCpgSet_map = load_DEG_DMG(input_dir + "/DMP/[train " + str(k) + "] AD DMP.tsv", thresh_lfc_me, thresh_pval_me, "DMP", mapTableFile)
 
 			its_geneSet = degSet & dmgSet
+    			# Debugging info: show sizes of selected feature sets
+			print("degSet size: {}\tdmgSet size: {}\tintersection size: {}".format(len(degSet), len(dmgSet), len(its_geneSet)))
+			
 
 			## our feature selection approach
 			train_xy_gxpr = applyFeatSel_DEG_intersectGene(input_dir + "/XY_gexp_train_" + str(k) + "_ML_input.tsv", its_geneSet)
