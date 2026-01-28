@@ -16,10 +16,8 @@
 ####################################################################################################################################################
 
 
-from time import time
 import pandas as pd
 import tensorflow as tf
-tf.compat.v1.disable_eager_execution()
 from bayes_opt import BayesianOptimization
 from sklearn.preprocessing import StandardScaler
 import numpy as np
@@ -232,11 +230,8 @@ def applyDimReduction_DEG_intersectGene(infilename, geneSet, filter_fn, Thres_lf
 	print(selected_genelist)
 
 	xy_all_df = pd.read_csv(infilename, sep='\t')
-
-	# Get the intersection of the columns in xy_all_df and selected_genelist
-	common_cols = [col for col in selected_genelist if col in xy_all_df.columns]
-	xy_sel_df = xy_all_df[common_cols]
-	xy = xy_sel_df.values
+	xy_sel_df = xy_all_df[selected_genelist]
+	xy = xy_sel_df.as_matrix()
 	print("xy shape: " + xy.shape.__str__())
 
 	xy_values = xy[:, 1:-2]
@@ -290,10 +285,8 @@ def applyDimReduction_DMP_intersectGene(infilename, geneSet, filter_fn):
 	#xy_all_df = pd.read_csv(infilename, sep='\t')
 	#xy_sel_df = xy_all_df[selected_cpglist]
 
-	xy_all_df = pd.read_csv(infilename, sep='\t')
-	common_cols = [col for col in selected_cpglist if col in xy_all_df.columns]
-	xy_sel_df = xy_all_df[common_cols]
-	xy = xy_sel_df.values	
+	xy_sel_df = pd.read_csv(infilename, sep='\t', usecols=selected_cpglist)
+	xy = xy_sel_df.as_matrix() ## sampleID, expr + label 2 columns
 	print("xy shape: " + xy.shape.__str__())
 	print(xy)
 
@@ -812,27 +805,27 @@ def neural_network(num_hidden, size_layer, learning_rate, dropout_rate, batch_si
 
 		return tf.nn.dropout(layer, dropout_rate)
 
-	tf.compat.v1.reset_default_graph()
+	tf.reset_default_graph()
 
 	# define placeholder for X, Y
-	X = tf.compat.v1.placeholder(tf.float32, shape=[None, x_data.shape[1]])  # 191 features
-	Y = tf.compat.v1.placeholder(tf.int32, shape=[None, 1])  # 2 class [0 or 1] in one label
+	X = tf.placeholder(tf.float32, shape=[None, x_data.shape[1]])  # 191 features
+	Y = tf.placeholder(tf.int32, shape=[None, 1])  # 2 class [0 or 1] in one label
 
 	classes = 2
 	Y_one_hot = tf.one_hot(Y, classes)
 	Y_one_hot = tf.reshape(Y_one_hot, [-1, classes])
 
 	## initialization of each layers
-	input_layer = tf.compat.v1.get_variable("w_1", shape=[x_data.shape[1], size_layer], initializer=xavier_init(x_data.shape[1], size_layer)) ## initializer=xavier_init ## for L1
-	biased_layer = tf.Variable(tf.compat.v1.random_normal([size_layer])) ## for L1
-	output_layer = tf.compat.v1.get_variable("w_o", shape=[size_layer, onehot.shape[1]], initializer=xavier_init(size_layer, onehot.shape[1]))  ## initializer=xavier_init ## for L1
-	biased_output = tf.Variable(tf.compat.v1.random_normal([onehot.shape[1]]))
+	input_layer = tf.get_variable("w_1", shape=[x_data.shape[1], size_layer], initializer=xavier_init(x_data.shape[1], size_layer)) ## initializer=xavier_init ## for L1
+	biased_layer = tf.Variable(tf.random_normal([size_layer])) ## for L1
+	output_layer = tf.get_variable("w_o", shape=[size_layer, onehot.shape[1]], initializer=xavier_init(size_layer, onehot.shape[1]))  ## initializer=xavier_init ## for L1
+	biased_output = tf.Variable(tf.random_normal([onehot.shape[1]]))
 	layers, biased = [], []
 
 	## build layers
 	for i in range(num_hidden - 1):
-		layers.append(tf.compat.v1.get_variable(name="w_" + str(i+2), shape=[size_layer, size_layer], initializer=xavier_init(size_layer, size_layer))) ## initializer=xavier_init
-		biased.append(tf.Variable(tf.compat.v1.random_normal([size_layer])))
+		layers.append(tf.get_variable(name="w_" + str(i+2), shape=[size_layer, size_layer], initializer=xavier_init(size_layer, size_layer))) ## initializer=xavier_init
+		biased.append(tf.Variable(tf.random_normal([size_layer])))
 
 	first_l = activate(activation, X, input_layer, biased_layer) ## for L1
 	next_l = activate(activation, first_l, layers[0], biased[0]) ## for L1
@@ -847,15 +840,15 @@ def neural_network(num_hidden, size_layer, learning_rate, dropout_rate, batch_si
 	cost_i = tf.nn.softmax_cross_entropy_with_logits(logits=last_l, labels=Y_one_hot) # original
 	cost = tf.reduce_mean(cost_i)
 
-	optimizer = tf.compat.v1.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(cost)
+	optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(cost)
 
 	prediction = tf.argmax(hypothesis, 1)
 	correct_prediction = tf.equal(prediction, tf.argmax(Y_one_hot, 1))
 	accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 	## start to run TF
-	sess = tf.compat.v1.Session()
-	sess.run(tf.compat.v1.global_variables_initializer())
+	sess = tf.Session()
+	sess.run(tf.global_variables_initializer())
 
 	trainingEpoch = 400
 	for i in range(trainingEpoch):
@@ -911,17 +904,15 @@ def generate_nn(num_hidden, size_layer, learning_rate, dropout_rate):
 
 ########################################################################################################################
 ## start Bayesian optimization
-
-total_start_time = time.time()
 Thres_lfc = 1
 Thres_pval = 0.01
-degSet = getDEG_limma("./dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
-dmgSet, cpgSet = getDMG("./dataset/DMP_list.tsv") ## DMG: only LFC 1, Pval 0.01
+degSet = getDEG_limma("../../dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
+dmgSet, cpgSet = getDMG("../../dataset/DMP_list.tsv") ## DMG: only LFC 1, Pval 0.01
 its_geneSet = degSet & dmgSet
 
 ## extract genes, methylation positions
-XY_gxpr = applyDimReduction_DEG_intersectGene("./dataset/allforDNN_ge_sample.tsv", its_geneSet, "./dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
-XY_meth = applyDimReduction_DMP_intersectGene("./dataset/allforDNN_me_sample.tsv", its_geneSet, "./dataset/DMP_list.tsv")
+XY_gxpr = applyDimReduction_DEG_intersectGene("../../dataset/allforDNN_ge.txt", its_geneSet, "../../dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
+XY_meth = applyDimReduction_DMP_intersectGene("../../dataset/allforDNN_me.txt", its_geneSet, "../../dataset/DMP_list.tsv")
 
 input_data_mode = "all"
 if input_data_mode == "all":
@@ -950,8 +941,6 @@ print(Y)
 for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 	print("\nk: " + str(k))
 
-	kfold_start_time = time.time()
-
 	x_train, x_test = X[tr_idx], X[te_idx]
 	y_train, y_test = Y[tr_idx], Y[te_idx]
 
@@ -963,10 +952,10 @@ for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 	print("x_test: " + str(x_test.shape))
 	print("y_test: " + str(y_test.shape))
 
-	x_train = x_train.astype(float)
-	x_test = x_test.astype(float)
-	y_train = y_train.astype(int)
-	y_test = y_test.astype(int)
+	x_train = x_train.astype(np.float)
+	x_test = x_test.astype(np.float)
+	y_train = y_train.astype(np.int)
+	y_test = y_test.astype(np.int)
 
 
 	## entire X and Y dataset
@@ -987,13 +976,9 @@ for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 	#doMachineLearning_single_Kfold(xy_train, xy_test, "./dataset/BO_input_ML_test_result.txt", 1)
 
 	## file name for final result
-	base_path = './results/k_fold_train_test_results'
-	log_filename = os.path.join(base_path,'nn-bayesian_hpSearch_' + str(k) + '.log')
+	log_filename = '../../results/k_fold_train_test_results/nn-bayesian_hpSearch_' + str(k) + '.log'
 	if os.path.exists(log_filename):
 		os.remove(log_filename)
-
-	if os.path.exists(base_path) == False:
-		os.makedirs(base_path)		
 
 	log_file = open(log_filename, 'a')
 	accbest = 0.0
@@ -1011,21 +996,11 @@ for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 										#'beta': (0.01, 0.49),
 										#'activation': (2, 2)
 										})
-
-	# print the arguments to NN_BAYESIAN.maximize
-	import inspect	
-	print("maximize signature:", inspect.signature(NN_BAYESIAN.maximize))
-	NN_BAYESIAN.maximize(init_points = 30, n_iter = 50)
+	NN_BAYESIAN.maximize(init_points = 30, n_iter = 50, acq = 'ei', xi = 0.0)
 
 	print("\n\n\n")
 	print('Max: ' + str(NN_BAYESIAN.max))
 	print('Res: ' + str(NN_BAYESIAN.res))
 
 	k += 1
-	kfold_end_time = time.time()
-	kfold_elapsed_time = kfold_end_time - kfold_start_time
-	print("K-Fold " + str(k-1) + " elapsed time (s): " + str(kfold_elapsed_time))
 
-total_end_time = time.time()
-total_elapsed_time = total_end_time - total_start_time
-print("Total elapsed time (s): " + str(total_elapsed_time))
