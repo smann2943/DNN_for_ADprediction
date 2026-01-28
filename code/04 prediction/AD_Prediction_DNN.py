@@ -888,6 +888,8 @@ def getProbeGeneMap(mapTableFile):
 
 	## select interesting CpG
 	interesting_TSS_list = ['TSS200', 'TSS1500']
+	
+	# This filters out rows where gene name is missing, is a single gene or TSS is not in interesting list
 	gpl_df["gene_symbol"] = gpl_df["UCSC_RefGene_Name"].apply(lambda x: x.split(';')[0] if ";" in x else '-')
 	gpl_df["TSS"] = gpl_df["UCSC_RefGene_Group"].apply(lambda x: "TSS<2000" if interesting_TSS_list[0] in x or interesting_TSS_list[1] in x else '-')
 	gpl_df = gpl_df[['ID', 'gene_symbol', 'TSS']]
@@ -908,16 +910,20 @@ def getDMG_limma(filename, lfc, pval, probeGene_map):
 	f = open(filename, 'r')
 	inCSV = csv.reader(f, delimiter="\t")
 	header = next(inCSV)  # for header
-
+	print("[limma - DMG] processing file: {}" + filename)
+	
 	for row in inCSV:
 		probe = row[0]
-		logFC = float(row[1])
-		Pvalue = float(row[4])  ## adj p-val : row[5]
-
-		if abs(logFC) >= lfc and Pvalue < pval:
+		fileLogFC = float(row[1])
+		filePVal = float(row[4])  ## adj p-val : row[5]
+		
+		if abs(fileLogFC) >= lfc and filePVal < pval:
+			print("Selected [limma - DMG]: probe {} threshhold logfc {} logFc {}  threshhold pval {} pval {} ".format(probe, lfc, fileLogFC, pval, filePVal))
 			if probe in probeGene_map.keys():
 				gene = probeGene_map[probe]
 				geneSet.add(gene)
+			else:
+				print("!!! Warning: probe {} not in probeGene_map".format(probe))
 
 	print("[limma - DMG] Number of gene set: " + str(len(geneSet)))
 	#print("geneSet: " + str(geneSet))

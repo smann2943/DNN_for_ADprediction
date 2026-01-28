@@ -1,16 +1,19 @@
 FROM ubuntu:16.04
 ENV DEBIAN_FRONTEND=noninteractive
-ENV R_VERSION=4.5.2
+ENV R_MAJOR_VERSION=3
+ENV R_FULL_VERSION=${R_MAJOR_VERSION}.5.2
 ENV PYTHON_VERSION=3.5
 ENV PYTHON_FULL_VERSION=${PYTHON_VERSION}.10
 
 # install ssl and gcc to support many pip packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
+    vim \
     wget \
     curl \
     libcurl4-openssl-dev \
     libpcre2-dev \
+    r-base-dev \
     gfortran \
     unzip \
     autoconf \
@@ -32,26 +35,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tk-dev \
     software-properties-common \
     ca-certificates \
-    libopenblas-base \
-    libopenblas-dev && \
+    libpcre3 libpcre3-dev \
+    gcc-7 g++-7 && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 1 --slave /usr/bin/g++ g++ /usr/bin/g++-7 && \
     rm -rf /var/lib/apt/lists/* 
 
 
 WORKDIR /tmp
 
 # install R from source
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends gcc-9 g++-9 && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 && \
-    curl -O https://cran.rstudio.com/src/base/R-4/R-${R_VERSION}.tar.gz && \
-    tar -xzvf R-${R_VERSION}.tar.gz && \
-    cd R-4.5.2 && ./configure   --prefix=/opt/R/${R_VERSION}   --enable-R-shlib   --enable-memory-profiling   --with-blas   --with-lapack && \
-    make && make install && \
-    ln -s /opt/R/4.5.2/bin/R /usr/local/bin/R && \
-    ln -s /opt/R/4.5.2/bin/Rscript /usr/local/bin/Rscript
+RUN curl -O https://cran.rstudio.com/src/base/R-${R_MAJOR_VERSION}/R-${R_FULL_VERSION}.tar.gz && \
+    tar -xzvf R-${R_FULL_VERSION}.tar.gz && \
+    cd R-${R_FULL_VERSION} && ./configure   --prefix=/opt/R/${R_FULL_VERSION}   --enable-R-shlib   --enable-memory-profiling   --with-blas   --with-lapack && \
+    make -j$(nproc) && make install && \
+    ln -s /opt/R/${R_FULL_VERSION}/bin/R /usr/local/bin/R && \
+    ln -s /opt/R/${R_FULL_VERSION}/bin/Rscript /usr/local/bin/Rscript
 
-    
+
 # download and untar python ${PYTHON_VERSION} into the tmp directory
 RUN wget "https://www.python.org/ftp/python/${PYTHON_FULL_VERSION}/Python-${PYTHON_FULL_VERSION}.tgz" && \
     tar xzf "Python-${PYTHON_FULL_VERSION}.tgz"
@@ -120,8 +120,8 @@ RUN export PYTHON_BIN_PATH="/opt/python${PYTHON_VERSION}/bin/python${PYTHON_VERS
 # install tensorflow and clean stuff up
 WORKDIR /src
 RUN python -m venv .venv && \
-python -m pip install --upgrade pip && \
-python -m pip install --upgrade pip && \
-python -m pip install /tmp/tensorflow_pkg/tensorflow-1.4.1-cp35-cp35m-linux_x86_64.whl && \
-rm -rf /tmp
+    python -m pip install --upgrade pip && \
+    python -m pip install --upgrade pip && \
+    python -m pip install /tmp/tensorflow_pkg/tensorflow-1.4.1-cp35-cp35m-linux_x86_64.whl && \
+    rm -rf /tmp
 
