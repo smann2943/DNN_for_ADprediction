@@ -923,17 +923,15 @@ def generate_nn(num_hidden, size_layer, learning_rate, dropout_rate):
 
 ########################################################################################################################
 ## start Bayesian optimization
-
-total_start_time = time.time()
 Thres_lfc = 1
 Thres_pval = 0.01
-degSet = getDEG_limma("./dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
-dmgSet, cpgSet = getDMG("./dataset/DMP_list.tsv") ## DMG: only LFC 1, Pval 0.01
+degSet = getDEG_limma("../../dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
+dmgSet, cpgSet = getDMG("../../dataset/DMP_list.tsv") ## DMG: only LFC 1, Pval 0.01
 its_geneSet = degSet & dmgSet
 
 ## extract genes, methylation positions
-XY_gxpr = applyDimReduction_DEG_intersectGene("./dataset/allforDNN_ge_sample.tsv", its_geneSet, "./dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
-XY_meth = applyDimReduction_DMP_intersectGene("./dataset/allforDNN_me_sample.tsv", its_geneSet, "./dataset/DMP_list.tsv")
+XY_gxpr = applyDimReduction_DEG_intersectGene("../../dataset/allforDNN_ge.txt", its_geneSet, "../../dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
+XY_meth = applyDimReduction_DMP_intersectGene("../../dataset/allforDNN_me.txt", its_geneSet, "../../dataset/DMP_list.tsv")
 
 input_data_mode = "all"
 if input_data_mode == "all":
@@ -961,8 +959,6 @@ print(Y)
 
 for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 	print("\nk: " + str(k))
-
-	kfold_start_time = time.time()
 
 	x_train, x_test = X[tr_idx], X[te_idx]
 	y_train, y_test = Y[tr_idx], Y[te_idx]
@@ -999,13 +995,9 @@ for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 	#doMachineLearning_single_Kfold(xy_train, xy_test, "./dataset/BO_input_ML_test_result.txt", 1)
 
 	## file name for final result
-	base_path = './results/k_fold_train_test_results'
-	log_filename = os.path.join(base_path,'nn-bayesian_hpSearch_' + str(k) + '.log')
+	log_filename = '../../results/k_fold_train_test_results/nn-bayesian_hpSearch_' + str(k) + '.log'
 	if os.path.exists(log_filename):
 		os.remove(log_filename)
-
-	if os.path.exists(base_path) == False:
-		os.makedirs(base_path)		
 
 	log_file = open(log_filename, 'a')
 	accbest = 0.0
@@ -1034,10 +1026,4 @@ for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 	print('Res: ' + str(NN_BAYESIAN.res))
 
 	k += 1
-	kfold_end_time = time.time()
-	kfold_elapsed_time = kfold_end_time - kfold_start_time
-	print("K-Fold " + str(k-1) + " elapsed time (s): " + str(kfold_elapsed_time))
 
-total_end_time = time.time()
-total_elapsed_time = total_end_time - total_start_time
-print("Total elapsed time (s): " + str(total_elapsed_time))

@@ -191,9 +191,12 @@ doDEG <- function(input_tsv, lfc_threshold, p_value_threshold, k, type, mode){
   
 }
 
+
+
 ################################################################################################
-dir.create("./results/k_fold_train_test/DEG", recursive = TRUE)
-setwd("./results/k_fold_train_test/DEG")
+setwd("D:/Development/ADprediction_git/ADprediction/code/02 feature selection")
+dir.create("../../results/k_fold_train_test/DEG", recursive = TRUE)
+setwd("../../results/k_fold_train_test/DEG")
 
 p_value_threshold=0.01
 lfc_threshold=1
