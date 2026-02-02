@@ -26,9 +26,7 @@ import pandas as pd
 import sys
 import os
 import operator
-#import matplotlib as mpl
-#import matplotlib.pyplot as plt
-#mpl.use('Agg')
+
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score, train_test_split
@@ -914,11 +912,11 @@ def getDMG_limma(filename, lfc, pval, probeGene_map):
 	
 	for row in inCSV:
 		probe = row[0]
-		fileLogFC = float(row[1])
-		filePVal = float(row[4])  ## adj p-val : row[5]
+		logFC = float(row[1])
+		Pvalue = float(row[4])  ## adj p-val : row[5]
 		
-		if abs(fileLogFC) >= lfc and filePVal < pval:
-			print("Selected [limma - DMG]: probe {} threshhold logfc {} logFc {}  threshhold pval {} pval {} ".format(probe, lfc, fileLogFC, pval, filePVal))
+		if abs(logFC) >= lfc and Pvalue < pval:
+			print("Selected [limma - DMG]: probe {} threshhold logfc {} logFc {}  threshhold pval {} pval {} ".format(probe, lfc, logFC, pval, Pvalue))
 			if probe in probeGene_map.keys():
 				gene = probeGene_map[probe]
 				geneSet.add(gene)
@@ -1015,7 +1013,7 @@ def main(args):
 			dmgSet, geneCpgSet_map = load_DEG_DMG(input_dir + "/DMP/[train " + str(k) + "] AD DMP.tsv", thresh_lfc_me, thresh_pval_me, "DMP", mapTableFile)
 
 			its_geneSet = degSet & dmgSet
-    			# Debugging info: show sizes of selected feature sets
+    		# Debugging info: show sizes of selected feature sets
 			print("degSet size: {}\tdmgSet size: {}\tintersection size: {}".format(len(degSet), len(dmgSet), len(its_geneSet)))
 			
 

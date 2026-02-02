@@ -23,10 +23,6 @@ import csv
 import pandas as pd
 import argparse
 import os
-#import matplotlib as mpl
-#mpl.use('Agg')
-#from mpl_toolkits.mplot3d import Axes3D
-#import matplotlib.pyplot as plt
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.manifold import TSNE
