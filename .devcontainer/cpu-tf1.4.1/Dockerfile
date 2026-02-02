@@ -36,8 +36,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     software-properties-common \
     ca-certificates \
     libpcre3 libpcre3-dev \
-    gcc-7 g++-7 && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 1 --slave /usr/bin/g++ g++ /usr/bin/g++-7 && \
+    patchelf && \
     rm -rf /var/lib/apt/lists/* 
 
 
