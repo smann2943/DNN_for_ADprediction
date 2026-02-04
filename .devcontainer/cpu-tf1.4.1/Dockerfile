@@ -125,7 +125,8 @@ RUN python -m venv .venv && \
     rm -rf /tmp
 
 # add alternative gcc version for vscode compatibility
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
+RUN mkdir -p /tmp && \
+    add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
     apt-get update && \
     apt-get install -y gcc-9 g++-9 && \
     rm -rf /var/lib/apt/lists/*
