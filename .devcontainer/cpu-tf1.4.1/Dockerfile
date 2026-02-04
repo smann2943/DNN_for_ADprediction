@@ -123,10 +123,14 @@ RUN python -m venv .venv && \
     python -m pip install --upgrade pip && \
     python -m pip install /tmp/tensorflow_pkg/tensorflow-1.4.1-cp35-cp35m-linux_x86_64.whl 
 
-# add alternative gcc version for vscode compatibility
-RUN apt-get update && apt-get install -y gnupg2 && \
-    add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
-    apt-get update && \
-    apt-get install -y gcc-9 g++-9 && \
-    rm -rf /var/lib/apt/lists/*
+# install glibc version for vscode compatibility
+WORKDIR /tmp
+RUN wget https://ftp.gnu.org/gnu/libc/glibc-2.28.tar.gz && \
+    tar -xvzf glibc-2.28.tar.gz && \
+    cd glibc-2.28 && \
+    mkdir glibc-build && \
+    cd glibc-build && \
+    ../glibc-2.28/configure --prefix=/opt/glibc-2.28 && \
+    make -j$(nproc) && \
+    make install
 
