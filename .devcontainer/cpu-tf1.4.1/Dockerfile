@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     liblzma-dev \
     tk-dev \
     software-properties-common \
-    ca-certificates \
+    ca-certificates \    
     libpcre3 libpcre3-dev \
     patchelf && \
     rm -rf /var/lib/apt/lists/* 
@@ -123,4 +123,10 @@ RUN python -m venv .venv && \
     python -m pip install --upgrade pip && \
     python -m pip install /tmp/tensorflow_pkg/tensorflow-1.4.1-cp35-cp35m-linux_x86_64.whl && \
     rm -rf /tmp
+
+# add alternative gcc version for vscode compatibility
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
+    apt-get update && \
+    apt-get install -y gcc-9 g++-9 && \
+    rm -rf /var/lib/apt/lists/*
 
