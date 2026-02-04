@@ -134,3 +134,5 @@ RUN wget https://ftp.gnu.org/gnu/libc/glibc-2.28.tar.gz && \
     make -j$(nproc) && \
     make install
 
+RUN ls -al /opt/glibc-2.28
+
