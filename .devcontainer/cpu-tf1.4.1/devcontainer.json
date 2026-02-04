@@ -13,8 +13,8 @@
         }
     },
     "remoteEnv": {
-        "VSCODE_SERVER_CUSTOM_GLIBC_LINKER": "/lib64/ld-linux-x86-64.so.2",
-        "VSCODE_SERVER_CUSTOM_GLIBC_PATH": "/lib64:/lib:/usr/lib64:/usr/lib",
+        "VSCODE_SERVER_CUSTOM_GLIBC_PATH": "/opt/glibc-2.28/lib",
+        "VSCODE_SERVER_CUSTOM_GLIBC_LINKER": "/opt/glibc-2.28/lib/ld-linux-x86-64.so.2",
         "VSCODE_SERVER_PATCHELF_PATH": "/usr/bin/patchelf"
     },
     "forwardPorts": [],
