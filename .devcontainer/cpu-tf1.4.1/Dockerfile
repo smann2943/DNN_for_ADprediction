@@ -121,11 +121,10 @@ WORKDIR /src
 RUN python -m venv .venv && \
     python -m pip install --upgrade pip && \
     python -m pip install --upgrade pip && \
-    python -m pip install /tmp/tensorflow_pkg/tensorflow-1.4.1-cp35-cp35m-linux_x86_64.whl && \
-    rm -rf /tmp
+    python -m pip install /tmp/tensorflow_pkg/tensorflow-1.4.1-cp35-cp35m-linux_x86_64.whl 
 
 # add alternative gcc version for vscode compatibility
-RUN mkdir -p /tmp && \
+RUN apt-get update && apt-get install -y gnupg2 software-properties-common && \
     add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
     apt-get update && \
     apt-get install -y gcc-9 g++-9 && \
