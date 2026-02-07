@@ -102,7 +102,11 @@ RUN PYTHON_BIN_PATH="/opt/python${PYTHON_VERSION}/bin/python${PYTHON_VERSION}" \
 # This is the critical fix for TF 1.4.x
 RUN echo 'import %workspace%/tools/bazel.rc' > .bazelrc
 
-ENV BAZEL_BUILD_OPTS="--local_resources 3072,1.5,1.0 --jobs=1 --ram_utilization_factor=70"
+# Set bazel build options to limit resource usage
+# --local_resources 8192,1,1.0 means: 8192 MB RAM, 1 CPU cores, 6.0 GB disk
+# --jobs=1 means only build one thing at a time (no parallelism)
+# --ram_utilization_factor=70 means only use 70% of available RAM
+ENV BAZEL_BUILD_OPTS="--local_resources 8192,1,6.0 --jobs=1 --ram_utilization_factor=70"
 
 # Build without --config=opt (this is the key)
 RUN export PYTHON_BIN_PATH="/opt/python${PYTHON_VERSION}/bin/python${PYTHON_VERSION}" && \
@@ -125,14 +129,19 @@ RUN python -m venv .venv && \
 
 # install glibc version for vscode compatibility
 WORKDIR /tmp
-RUN wget https://ftp.gnu.org/gnu/libc/glibc-2.28.tar.gz && \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gawk \
+    bison && \
+    wget https://ftp.gnu.org/gnu/libc/glibc-2.28.tar.gz && \
     tar -xvzf glibc-2.28.tar.gz && \
     cd glibc-2.28 && \
     mkdir glibc-build && \
     cd glibc-build && \
-    ../glibc-2.28/configure --prefix=/opt/glibc-2.28 && \
+    ../configure --prefix=/opt/glibc-2.28 && \
     make -j$(nproc) && \
-    make install
+    make install && \
+    rm -rf /var/lib/apt/lists/* 
 
-RUN ls -al /opt/glibc-2.28
+CMD ["sh", "-c", "while true; do sleep 1000; done"]
+
 
