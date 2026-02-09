@@ -131,7 +131,12 @@ RUN python -m venv .venv && \
 WORKDIR /tmp
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gawk \
-    bison && \
+    bison \
+    software-properties-common && \
+    add-apt-repository ppa:ubuntu-toolchain-r/test && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    gcc-9 \
+    g++-9 && \
     wget https://ftp.gnu.org/gnu/libc/glibc-2.28.tar.gz && \
     tar -xvzf glibc-2.28.tar.gz && \
     cd glibc-2.28 && \
