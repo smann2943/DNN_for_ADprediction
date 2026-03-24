@@ -1,22 +1,47 @@
-# define the CRAN mirror 
+# 1. Setup Mirror
 options(repos = c(CRAN = "https://cloud.r-project.org/"))
-# Define a vector of package names to be installed
-packages_to_install <- c("openxlsx", "data.table", "remotes", "pracma", "dgof", "BiocManager")
 
-# Check if packages are installed and install them if they are not
-# This loop iterates through each package name in the vector
+# 2. Bootstrap 'remotes'
+if (!requireNamespace("remotes", quietly = TRUE)) {
+  install.packages("remotes", dependencies = TRUE)
+}
+
+# 3. MANUALLY PIN Rcpp (The Culprit)
+# Rcpp 1.0.3 was the standard for late 2019 and is highly compatible with R 3.5.2
+if (!requireNamespace("Rcpp", quietly = TRUE)) {
+  message("Installing legacy Rcpp 1.0.3...")
+  remotes::install_version("Rcpp", version = "1.0.3", upgrade = "never")
+}
+
+# 4. Install openxlsx 4.2.3
+if (!requireNamespace("openxlsx", quietly = TRUE)) {
+  message("Installing openxlsx 4.2.3...")
+  remotes::install_version("openxlsx", version = "4.2.3", upgrade = "never")
+}
+
+# 5. Define and Install remaining packages
+packages_to_install <- c("data.table", "pracma", "dgof", "BiocManager")
 for (pkg in packages_to_install) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
-    install.packages(pkg, dependencies = TRUE)
+    if (pkg == "BiocManager") {
+      remotes::install_version("BiocManager", version = "1.30.4", upgrade = "never")
+    } else {
+      install.packages(pkg, dependencies = TRUE)
+    }
   }
 }
 
-# Load the installed packages
-# The lapply function applies the library function to each package name
-invisible(lapply(packages_to_install, library, character.only = TRUE))
+# 6. Bioconductor
+if (!requireNamespace("limma", quietly = TRUE)) {
+  BiocManager::install("limma", version = "3.8", update = FALSE, ask = FALSE)
+}
 
-BiocManager::install("limma")
-# Your R script can now use functions from these packages
-# For example:
-# data <- read_csv("your_data.csv")
-# ggplot(data, aes(x = column1, y = column2)) + geom_point()
+# 7. Final Loading Verification
+all_packages <- c("Rcpp", "data.table", "pracma", "dgof", "BiocManager", "openxlsx", "limma")
+for (pkg in all_packages) {
+  if (!require(pkg, character.only = TRUE)) {
+    stop(paste("Failed to load:", pkg))
+  }
+}
+
+message("Full environment successfully loaded.")

@@ -1,0 +1,25 @@
+{
+    "name": "Python 3 GPU - TF 1.4.1",
+    "build": {
+        "dockerfile": "./Dockerfile"
+    },
+    "runArgs": [
+        "--name", "ubuntu16.04-cuda-gpu",
+        "--gpus", "all"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-toolsai.jupyter",
+                "REditorSupport.r"
+            ]
+        }
+    },
+    "forwardPorts": [],
+    "postCreateCommand": {
+        "python-sym-link": "ln -sf /usr/bin/python3 /usr/bin/python",
+        "python-create-and-activate-venv": "python -m venv .venv",
+        "python-install-requirements": "source .venv/bin/activate && python -m pip install --upgrade pip && python -m pip install -r requirements.txt"
+    }
+}

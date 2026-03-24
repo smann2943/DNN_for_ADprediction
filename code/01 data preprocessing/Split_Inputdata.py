@@ -164,8 +164,8 @@ if __name__ == '__main__':
 
 	## output directory
 	## performance of the model
-	output_dir = "../../results/k_fold_train_test"
-	if not os.path.exists(output_dir): os.mkdir(output_dir)
+	output_dir = "./results/k_fold_train_test"
+	if not os.path.exists(output_dir): os.makedirs(output_dir)
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--input_1", type=str, default=input_file_geneExpr, help=help_str)

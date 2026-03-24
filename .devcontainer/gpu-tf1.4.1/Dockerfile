@@ -7,7 +7,7 @@
 ## NOTE: On Apple Silicon, QEMU emulation (~5-10x slower but numerically correct)
 ##       is used automatically via --platform linux/amd64.
 
-FROM python:3.6.14-slim-bullseye
+FROM nvidia/cuda:11.0.3-cudnn8-runtime-ubuntu16.04
 
 # Pin versions from dependency forensics (Phase 1)
 ENV TF_VERSION=1.4.1 \
@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     r-base-dev \
     gcc g++ gfortran make \
     pkg-config \
-    zlib1g-dev \
+    zlib1g-dev \ 
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
@@ -32,22 +32,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libfreetype6-dev \
     libpng-dev \
     libjpeg-dev \
-    && rm -rf /var/lib/apt/lists/*
+    locales locales-all \
+    python3-venv \
+    python3-pip \
+    software-properties-common \
+    wget && \
+    rm -rf /var/lib/apt/lists/*
 
-# Pin pip and install Python ML packages (exact versions from paper)
-RUN pip install --no-cache-dir \
-    "pip==19.3.1" \
-    "setuptools==44.1.1" \
-    "wheel==0.33.6"
-
-RUN pip install --no-cache-dir \
-    "numpy==${NUMPY_VERSION}" \
-    "scipy==${SCIPY_VERSION}" \
-    "pandas==${PANDAS_VERSION}" \
-    "scikit-learn==${SKLEARN_VERSION}" \
-    "matplotlib==${MATPLOTLIB_VERSION}" \
-    "bayesian-optimization==${BAYESOPT_VERSION}" \
-    "tensorflow==${TF_VERSION}"
+ENV LANG en_US.UTF-8  
+ENV LC_ALL en_US.UTF-8
 
 # Install R packages (CRAN + Bioconductor limma from 2019 era)
 RUN Rscript -e " \
