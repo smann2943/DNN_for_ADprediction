@@ -158,13 +158,14 @@ if __name__ == '__main__':
 	## input files
 	## file 1: gene expression (samples x genes) with label (AD, Normal)
 	## file 2: DNA methylation (samples x CpG probes) with label (AD, Normal)
-	input_file_geneExpr = "../../dataset/allforDNN_ge.txt"
-	input_file_DNAMeth = "../../dataset/allforDNN_me.txt"
+	## NOTE:  In the original code the file names did not have the _sample suffix, but the files in the dataset folder do have this suffix.
+	input_file_geneExpr = "./dataset/allforDNN_ge_sample.tsv"
+	input_file_DNAMeth = "./dataset/allforDNN_me_sample.tsv"
 
 	## output directory
 	## performance of the model
-	output_dir = "../../results/k_fold_train_test"
-	if not os.path.exists(output_dir): os.mkdir(output_dir)
+	output_dir = "./results/k_fold_train_test"
+	if not os.path.exists(output_dir): os.makedirs(output_dir)
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--input_1", type=str, default=input_file_geneExpr, help=help_str)

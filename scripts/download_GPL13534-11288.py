@@ -9,7 +9,7 @@ def download_file(url, output_path):
     response.raise_for_status()  # Check that the request was successful
     with open(output_path, 'wb') as file:
         file.write(response.content)
-    print(f"File downloaded and saved to {output_path}")
+    print("File downloaded and saved to" + output_path)
 
 
 if __name__ == "__main__":

@@ -58,8 +58,8 @@ A description of the datasets used in the project can be found in [DATASET.md](.
 - Python 3.5 is recommended (code was originally developed for older TensorFlow versions; current `requirements.txt` pins modern binaries).
 - Install Python dependencies from `requirements.txt`:
 
-	python -m venv venv
-	source venv/bin/activate
+	python -m venv .venv
+	source .venv/bin/activate
 	pip install -r requirements.txt
 
 Notes:

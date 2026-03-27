@@ -15,7 +15,7 @@
 #       best combination of hyper-parameters
 ####################################################################################################################################################
 
-
+import time
 import pandas as pd
 import tensorflow as tf
 from bayes_opt import BayesianOptimization
@@ -230,7 +230,16 @@ def applyDimReduction_DEG_intersectGene(infilename, geneSet, filter_fn, Thres_lf
 	print(selected_genelist)
 
 	xy_all_df = pd.read_csv(infilename, sep='\t')
-	xy_sel_df = xy_all_df[selected_genelist]
+
+	# Get the intersection of the columns in xy_all_df and selected_genelist
+	# Commenting out this code because there are values in selected_genelist that are not in the columns in the dataframe which throws an error.
+	# We need to get the intersection of columns and this code is not doing that
+	# xy_sel_df = xy_all_df[selected_genelist]
+
+	# This code is a replacement of the commented out code above to get the columns in the dataframe based on the filtered set of genes
+	existing_genelist = [col for col in selected_genelist if col in xy_all_df.columns]
+	xy_sel_df = xy_all_df[existing_genelist]
+
 	xy = xy_sel_df.as_matrix()
 	print("xy shape: " + xy.shape.__str__())
 
@@ -285,7 +294,17 @@ def applyDimReduction_DMP_intersectGene(infilename, geneSet, filter_fn):
 	#xy_all_df = pd.read_csv(infilename, sep='\t')
 	#xy_sel_df = xy_all_df[selected_cpglist]
 
-	xy_sel_df = pd.read_csv(infilename, sep='\t', usecols=selected_cpglist)
+	# Get the intersection of the columns in xy_all_df and selected_genelist
+	# Commenting out this code because there are values in selected_genelist that are not in the columns in the dataframe which throws an error.
+	# We need to get the intersection of columns and this code is not doing that	
+	#xy_sel_df = pd.read_csv(infilename, sep='\t', usecols=selected_cpglist)
+
+	xy_columns_df = pd.read_csv(infilename, sep='\t', nrows=0)
+
+	# This code is a replacement of the commented out code above to get the columns in the dataframe based on the filtered set of genes
+	filtered_columns = [col for col in selected_cpglist if col in xy_columns_df.columns]
+	xy_sel_df = pd.read_csv(infilename, sep='\t', usecols=filtered_columns)
+	
 	xy = xy_sel_df.as_matrix() ## sampleID, expr + label 2 columns
 	print("xy shape: " + xy.shape.__str__())
 	print(xy)
@@ -906,13 +925,13 @@ def generate_nn(num_hidden, size_layer, learning_rate, dropout_rate):
 ## start Bayesian optimization
 Thres_lfc = 1
 Thres_pval = 0.01
-degSet = getDEG_limma("../../dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
-dmgSet, cpgSet = getDMG("../../dataset/DMP_list.tsv") ## DMG: only LFC 1, Pval 0.01
+degSet = getDEG_limma("./dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
+dmgSet, cpgSet = getDMG("./dataset/DMP_list.tsv") ## DMG: only LFC 1, Pval 0.01
 its_geneSet = degSet & dmgSet
 
 ## extract genes, methylation positions
-XY_gxpr = applyDimReduction_DEG_intersectGene("../../dataset/allforDNN_ge.txt", its_geneSet, "../../dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
-XY_meth = applyDimReduction_DMP_intersectGene("../../dataset/allforDNN_me.txt", its_geneSet, "../../dataset/DMP_list.tsv")
+XY_gxpr = applyDimReduction_DEG_intersectGene("./dataset/allforDNN_ge_sample.tsv", its_geneSet, "./dataset/DEG_list.tsv", Thres_lfc, Thres_pval)
+XY_meth = applyDimReduction_DMP_intersectGene("./dataset/allforDNN_me_sample.tsv", its_geneSet, "./dataset/DMP_list.tsv")
 
 input_data_mode = "all"
 if input_data_mode == "all":
@@ -976,7 +995,9 @@ for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 	#doMachineLearning_single_Kfold(xy_train, xy_test, "./dataset/BO_input_ML_test_result.txt", 1)
 
 	## file name for final result
-	log_filename = '../../results/k_fold_train_test_results/nn-bayesian_hpSearch_' + str(k) + '.log'
+	log_dir = './results/k_fold_train_test_results'
+	if not os.path.exists(log_dir): os.makedirs(log_dir)
+	log_filename = log_dir + '/nn-bayesian_hpSearch_' + str(k) + '.log'
 	if os.path.exists(log_filename):
 		os.remove(log_filename)
 
@@ -996,6 +1017,10 @@ for tr_idx, te_idx in kf.split(XY_gxpr_meth):
 										#'beta': (0.01, 0.49),
 										#'activation': (2, 2)
 										})
+
+	# print the arguments to NN_BAYESIAN.maximize
+	import inspect	
+	print("maximize signature:", inspect.signature(NN_BAYESIAN.maximize))
 	NN_BAYESIAN.maximize(init_points = 30, n_iter = 50, acq = 'ei', xi = 0.0)
 
 	print("\n\n\n")

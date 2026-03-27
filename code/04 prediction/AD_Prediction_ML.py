@@ -23,10 +23,6 @@ import csv
 import pandas as pd
 import argparse
 import os
-import matplotlib as mpl
-mpl.use('Agg')
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.manifold import TSNE
@@ -682,25 +678,25 @@ def main(args):
 			## make directories
 			## table 1
 			dirPath_table1_ge = output_dir + "/k_" + str(k) + "/table_1/genExpr"
-			if not os.path.exists(dirPath_table1_ge): os.mkdir(dirPath_table1_ge)
+			if not os.path.exists(dirPath_table1_ge): os.makedirs(dirPath_table1_ge)
 			dirPath_table1_me = output_dir + "/k_" + str(k) + "/table_1/meth"
-			if not os.path.exists(dirPath_table1_me): os.mkdir(dirPath_table1_me)
+			if not os.path.exists(dirPath_table1_me): os.makedirs(dirPath_table1_me)
 
 			## table 2
 			dirPath_table2_geme = output_dir + "/k_" + str(k) + "/table_2/genExpr_meth"
-			if not os.path.exists(dirPath_table2_geme): os.mkdir(dirPath_table2_geme)
+			if not os.path.exists(dirPath_table2_geme): os.makedirs(dirPath_table2_geme)
 
 			## table 3
 			dirPath_table3_deg = output_dir + "/k_" + str(k) + "/table_3/DEG"
-			if not os.path.exists(dirPath_table3_deg): os.mkdir(dirPath_table3_deg)
+			if not os.path.exists(dirPath_table3_deg): os.makedirs(dirPath_table3_deg)
 			dirPath_table3_dmg = output_dir + "/k_" + str(k) + "/table_3/DMG"
-			if not os.path.exists(dirPath_table3_dmg): os.mkdir(dirPath_table3_dmg)
+			if not os.path.exists(dirPath_table3_dmg): os.makedirs(dirPath_table3_dmg)
 			dirPath_table3_deg_dmg = output_dir + "/k_" + str(k) + "/table_3/DEG_DMG"
-			if not os.path.exists(dirPath_table3_deg_dmg): os.mkdir(dirPath_table3_deg_dmg)
+			if not os.path.exists(dirPath_table3_deg_dmg): os.makedirs(dirPath_table3_deg_dmg)
 
 			##  table 4
 			dirPath_table4_deg_dmg = output_dir + "/k_" + str(k) + "/table_4/DEG_DMG"
-			if not os.path.exists(dirPath_table4_deg_dmg): os.mkdir(dirPath_table4_deg_dmg)
+			if not os.path.exists(dirPath_table4_deg_dmg): os.makedirs(dirPath_table4_deg_dmg)
 
 
 			## ExpResult 1. PCA, tSNE + ML algorithms with same # of reduced features for each GE, Meth
@@ -716,7 +712,7 @@ def main(args):
 			thresh_pval_ge = 0.01
 			thresh_lfc_me = 0.58
 			thresh_pval_me = 0.01
-			mapTableFile = "../../dataset/GPL13534-11288.txt"
+			mapTableFile = "./dataset/GPL13534-11288.txt"
 
 			## training
 			## load DEG, DMG for
@@ -987,11 +983,11 @@ if __name__ == '__main__':
 	help_str = "python AD_Prediction_ML.py" + "\n"
 
 	## input directory
-	input_dir_path = "../../results/k_fold_train_test"
+	input_dir_path = "./results/k_fold_train_test"
 
 	## output directory
-	output_dir_path = "../../results/k_fold_train_test_results"
-	if not os.path.exists(output_dir_path): os.mkdir(output_dir_path)
+	output_dir_path = "./results/k_fold_train_test_results"
+	if not os.path.exists(output_dir_path): os.makedirs(output_dir_path)
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--input", type=str, default=input_dir_path, help=help_str)
